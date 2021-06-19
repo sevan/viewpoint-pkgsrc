@@ -1,0 +1,22 @@
+$NetBSD$
+
+Add an option to avoid pointlessly building the C++ examples which are not
+installed by default. They consume alot of resources to build alone.
+
+--- examples/CMakeLists.txt.orig	2021-06-10 22:16:00.637949886 +0000
++++ examples/CMakeLists.txt
+@@ -1,10 +1,14 @@
+ set(EXAMPLE_PROGRAMS hello_world.py)
+ install(PROGRAMS ${EXAMPLE_PROGRAMS} DESTINATION share/bcc/examples)
+ 
++option(BUILD_CPP_EXAMPLES "Build C++ examples." OFF)
++
+ if(ENABLE_CLANG_JIT)
++if(BUILD_CPP_EXAMPLES)
+ if(ENABLE_USDT)
+ add_subdirectory(cpp)
+ endif(ENABLE_USDT)
++endif(BUILD_CPP_EXAMPLES)
+ add_subdirectory(lua)
+ add_subdirectory(networking)
+ add_subdirectory(tracing)

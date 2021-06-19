@@ -1,0 +1,7 @@
+$NetBSD$
+
+SHA1 (bcc-src-with-submodule.tar.gz) = 8235396724595ba1d146384724aa990a14a4a1c4
+RMD160 (bcc-src-with-submodule.tar.gz) = 93630c741351552f7b109929f166266461d7ca9b
+SHA512 (bcc-src-with-submodule.tar.gz) = 60ab3e7e11015878895d009afb2290d1e677e3c7bc04f493eb586136af190d7c0930757b34e721822eaf6700ecc17edeb30a4b04ea29c4a26cb885164060030a
+Size (bcc-src-with-submodule.tar.gz) = 6206563 bytes
+SHA1 (patch-examples_CMakeLists.txt) = 960d403e8de28ef97efb787ed399956c30bda247
