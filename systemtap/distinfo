@@ -1,0 +1,7 @@
+$NetBSD$
+
+SHA1 (systemtap-4.5.tar.gz) = c549d5fa7aaf6a8cef3371f5757d912d41eae934
+RMD160 (systemtap-4.5.tar.gz) = a50576d9d531d744eb9f6c0a50fbf708f6d7dec7
+SHA512 (systemtap-4.5.tar.gz) = 8136779a9f5cb0fbaae565eab1ab6fa307f1024dfc2c6c3845acfadff0eecc684ba89aa5d442c7b90c2c73edaab41ca07bae2bad8361f80fe8e9928b40466cd3
+Size (systemtap-4.5.tar.gz) = 5549909 bytes
+SHA1 (patch-testsuite_systemtap.base_perf.sh) = 3068d7d6bfd23abae70d7b40ef3e2297b4c89bce
