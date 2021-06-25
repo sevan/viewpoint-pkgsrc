@@ -1,0 +1,285 @@
+Patch to add USE_TOOLS+=dtrace where DTrace support is an option.
+This will pull in systemtap if not already installed on Linux host.
+For pkgsrc-2021Q1.
+
+TODO:
+Not all lang/php runtime packages covered/tested, just php80
+Only lang/python38 actually tested.
+x11/modular-xorg-server needs further work as autoconf barfs -ldl
+everywhere and breaks the build (-ldl is linked in the resulting binary)
+More packages to add (OpenJDK)
+
+Index: databases/mariadb55-client/options.mk
+===================================================================
+RCS file: /cvsroot/pkgsrc/databases/mariadb55-client/Attic/options.mk,v
+retrieving revision 1.4
+diff -u -p -r1.4 options.mk
+--- databases/mariadb55-client/options.mk	8 Aug 2017 11:23:38 -0000	1.4
++++ databases/mariadb55-client/options.mk	25 Jun 2021 12:19:29 -0000
+@@ -16,16 +16,15 @@ CMAKE_ARGS+=		-DWITH_SSL=system
+ CMAKE_ARGS+=		-DWITH_SSL=no
+ .endif
+ 
+-## This doesn't seem to build at all currently
+ # Enable DTrace support
+ PLIST_VARS+=		dtrace
+-## This doesn't seem to build at all currently
+-## .if !empty(PKG_OPTIONS:Mdtrace)
+-## CMAKE_ARGS+=		-DENABLE_DTRACE=ON
+-## PLIST.dtrace=		yes
+-## .else
++.if !empty(PKG_OPTIONS:Mdtrace)
++CMAKE_ARGS+=		-DENABLE_DTRACE=ON
++PLIST.dtrace=		yes
++USE_TOOLS+= 		dtrace
++.else
+ CMAKE_ARGS+=		-DENABLE_DTRACE=OFF
+-## .endif
++.endif
+ 
+ # Enable Sphinx SE support
+ # http://sphinxsearch.com/docs/current.html#sphinxse-overview
+Index: databases/postgresql13/options.mk
+===================================================================
+RCS file: /cvsroot/pkgsrc/databases/postgresql13/options.mk,v
+retrieving revision 1.1
+diff -u -p -r1.1 options.mk
+--- databases/postgresql13/options.mk	18 Oct 2020 09:24:02 -0000	1.1
++++ databases/postgresql13/options.mk	25 Jun 2021 12:19:29 -0000
+@@ -20,6 +20,7 @@ LIBS+=			-ldns_sd
+ # Dtrace support
+ .if !empty(PKG_OPTIONS:Mdtrace)
+ CONFIGURE_ARGS+=	--enable-dtrace
++USE_TOOLS+= 	dtrace
+ .endif
+ 
+ # ICU collatium support
+Index: lang/php80/options.mk
+===================================================================
+RCS file: /cvsroot/pkgsrc/lang/php80/options.mk,v
+retrieving revision 1.1
+diff -u -p -r1.1 options.mk
+--- lang/php80/options.mk	7 Mar 2021 13:41:36 -0000	1.1
++++ lang/php80/options.mk	25 Jun 2021 12:19:29 -0000
+@@ -5,8 +5,9 @@ PKG_SUPPORTED_OPTIONS+=	inet6 ssl mainta
+ PKG_SUPPORTED_OPTIONS+=	disable-filter-url
+ PKG_SUGGESTED_OPTIONS+=	inet6 ssl readline
+ 
+-.if ${OPSYS} == "SunOS" || ${OPSYS} == "Darwin" || ${OPSYS} == "FreeBSD"
++.if ${OPSYS} == "SunOS" || ${OPSYS} == "Darwin" || ${OPSYS} == "FreeBSD" || "Linux"
+ PKG_SUPPORTED_OPTIONS+=	dtrace
++USE_TOOLS+= 		dtrace
+ .endif
+ 
+ .include "../../mk/bsd.options.mk"
+Index: x11/modular-xorg-server/options.mk
+===================================================================
+RCS file: /cvsroot/pkgsrc/x11/modular-xorg-server/options.mk,v
+retrieving revision 1.22
+diff -u -p -r1.22 options.mk
+--- x11/modular-xorg-server/options.mk	15 Jan 2020 14:24:03 -0000	1.22
++++ x11/modular-xorg-server/options.mk	25 Jun 2021 12:19:29 -0000
+@@ -52,6 +52,7 @@ CFLAGS+=		-ggdb
+ .if !empty(PKG_OPTIONS:Mdtrace)
+ PLIST.dtrace=		yes
+ CONFIGURE_ARGS+=	--with-dtrace
++USE_TOOLS+= 		dtrace
+ .else
+ CONFIGURE_ARGS+=	--without-dtrace
+ .endif
+Index: lang/perl5/distinfo
+===================================================================
+RCS file: /cvsroot/pkgsrc/lang/perl5/distinfo,v
+retrieving revision 1.169
+diff -u -p -r1.169 distinfo
+--- lang/perl5/distinfo	15 Mar 2021 14:23:12 -0000	1.169
++++ lang/perl5/distinfo	25 Jun 2021 12:19:29 -0000
+@@ -4,7 +4,7 @@ SHA1 (perl-5.32.1.tar.xz) = 1fb4f710d139
+ RMD160 (perl-5.32.1.tar.xz) = ad9013fa389e3e73940c90b7d4ffd542a0cafc70
+ SHA512 (perl-5.32.1.tar.xz) = 3443c75aea91f0fe3712fee576239f1946d2301b8f7390b690e2f5d070fe71af8f9fa7769e42086c2d33d5f84370f80368fa9350b4f10cc0ac3e6c1f6209d8f9
+ Size (perl-5.32.1.tar.xz) = 12610988 bytes
+-SHA1 (patch-Configure) = 5a27e10c3d5b4bb8e514480808b6f2fb009ceeb0
++SHA1 (patch-Configure) = e1cbae3c548c1d9430a33435da725065721c7a38
+ SHA1 (patch-Makefile.SH) = 56203aea57c429a94760f039a978463b8859b0a9
+ SHA1 (patch-Safe.pm) = bfeefb82d4cfe991e3a9a90cd87b894c9f4cc337
+ SHA1 (patch-caretx.c) = b76b4175a58123fa4dfd2adf36b2207dcb6cf65a
+Index: lang/perl5/options.mk
+===================================================================
+RCS file: /cvsroot/pkgsrc/lang/perl5/options.mk,v
+retrieving revision 1.15
+diff -u -p -r1.15 options.mk
+--- lang/perl5/options.mk	1 Sep 2020 22:56:54 -0000	1.15
++++ lang/perl5/options.mk	25 Jun 2021 12:19:29 -0000
+@@ -47,7 +47,8 @@ PKG_SUGGESTED_OPTIONS+=		64bitauto
+ .endif
+ 
+ .if !empty(MACHINE_PLATFORM:MSunOS-5.1[1-9]-*) || \
+-    (${OPSYS} == "Darwin" && ${OS_VERSION:R} >= 9)
++    (${OPSYS} == "Darwin" && ${OS_VERSION:R} >= 9) || \
++    ${OPSYS} == "Linux"
+ PKG_SUGGESTED_OPTIONS+=		dtrace
+ .endif
+ 
+@@ -75,6 +76,7 @@ CFLAGS+=		-DDEBUGGING
+ 
+ .if !empty(PKG_OPTIONS:Mdtrace)
+ CONFIGURE_ARGS+=	-Dusedtrace
++USE_TOOLS+= 		dtrace
+ .endif
+ 
+ .if !empty(PKG_OPTIONS:Mmstats)
+Index: lang/perl5/patches/patch-Configure
+===================================================================
+RCS file: /cvsroot/pkgsrc/lang/perl5/patches/patch-Configure,v
+retrieving revision 1.10
+diff -u -p -r1.10 patch-Configure
+--- lang/perl5/patches/patch-Configure	4 Sep 2020 10:08:46 -0000	1.10
++++ lang/perl5/patches/patch-Configure	25 Jun 2021 12:19:29 -0000
+@@ -1,4 +1,4 @@
+-$NetBSD: patch-Configure,v 1.10 2020/09/04 10:08:46 js Exp $
++$NetBSD$
+ 
+ * Use "uname -r" to get OS version for *BSD.
+ * Move $loclibpth to the end of $dlist, instead of the beginning.
+@@ -7,8 +7,9 @@ $NetBSD: patch-Configure,v 1.10 2020/09/
+ * Add Minix
+ * Several other changes.
+ * Add rpath for QNX
++* Detect dtrace script installed from systemtap package
+ 
+---- Configure.orig	2020-06-14 23:01:24.000000000 +0000
++--- Configure.orig	2020-12-26 15:27:04.000000000 +0000
+ +++ Configure
+ @@ -3479,13 +3479,14 @@ EOM
+  			osvers="$3"
+@@ -141,7 +142,15 @@ $NetBSD: patch-Configure,v 1.10 2020/09/
+  prefixvar=vendorlib
+  . ./installprefix
+  
+-@@ -8530,6 +8550,7 @@ EOM
++@@ -8104,6 +8124,7 @@ eval $setvar
++ : DTrace support
++ dflt_dtrace='/usr/sbin/dtrace'
++ $test -x /usr/bin/dtrace && dflt_dtrace='/usr/bin/dtrace'
+++$test -x $prefix/bin/dtrace && dflt_dtrace="$prefix/bin/dtrace"
++ 
++ cat <<EOM
++ 
++@@ -8530,6 +8551,7 @@ EOM
+  			  esac
+  			  ;;
+  		    *linux*|irix*|gnu*)  dflt="-shared $optimize" ;;
+@@ -149,7 +158,7 @@ $NetBSD: patch-Configure,v 1.10 2020/09/
+  		    solaris) # See [perl #66604].
+  			    # On Solaris 11, gcc -m64 on amd64
+  			    # appears not to understand -G.  gcc versions at
+-@@ -8569,7 +8590,7 @@ EOM
++@@ -8569,7 +8591,7 @@ EOM
+  	esac
+  	for thisflag in $ldflags; do
+  	    case "$thisflag" in
+@@ -158,7 +167,7 @@ $NetBSD: patch-Configure,v 1.10 2020/09/
+  		    case " $dflt " in
+  			*" $thisflag "*) ;;
+  			*) dflt="$dflt $thisflag" ;;
+-@@ -8825,7 +8846,7 @@ if "$useshrplib"; then
++@@ -8825,7 +8847,7 @@ if "$useshrplib"; then
+  	freebsd|minix|mirbsd|netbsd|openbsd|interix|dragonfly|bitrig)
+  		xxx="-Wl,-R$shrpdir"
+  		;;
+@@ -167,7 +176,7 @@ $NetBSD: patch-Configure,v 1.10 2020/09/
+  		xxx="-Wl,-rpath,$shrpdir"
+  		;;
+  	hpux*)
+-@@ -8835,6 +8856,9 @@ if "$useshrplib"; then
++@@ -8835,6 +8857,9 @@ if "$useshrplib"; then
+  	cygwin)
+  		# cygwin needs only ldlibpth
+  		;;
+@@ -177,7 +186,7 @@ $NetBSD: patch-Configure,v 1.10 2020/09/
+  	*)
+  		tmp_shrpenv="env LD_RUN_PATH=$shrpdir"
+  		;;
+-@@ -9911,6 +9935,13 @@ esac
++@@ -9911,6 +9936,13 @@ esac
+  : Check if we want perlio
+  useperlio="$define"
+  
+@@ -191,7 +200,7 @@ $NetBSD: patch-Configure,v 1.10 2020/09/
+  : Set the vendorbin variables
+  case "$vendorprefix" in
+  '')	d_vendorbin="$undef"
+-@@ -20114,7 +20145,15 @@ RCAT(Rei,ser)
++@@ -20114,7 +20146,15 @@ RCAT(Rei,ser)
+  ACAT(Cir,cus)
+  EOCP
+  $cppstdin $cppflags $cppminus <cpp_stuff.c >cpp_stuff.out 2>&1
+@@ -208,7 +217,7 @@ $NetBSD: patch-Configure,v 1.10 2020/09/
+  	echo "Oh!  Smells like ANSI's been here." >&4
+  	echo "We can catify or stringify, separately or together!"
+  	cpp_stuff=42
+-@@ -22920,6 +22959,18 @@ eval $inhdr
++@@ -22923,6 +22963,18 @@ eval $inhdr
+  set fenv.h i_fenv
+  eval $inhdr
+  
+Index: lang/python36/options.mk
+===================================================================
+RCS file: /cvsroot/pkgsrc/lang/python36/options.mk,v
+retrieving revision 1.5
+diff -u -p -r1.5 options.mk
+--- lang/python36/options.mk	21 Jan 2020 10:57:26 -0000	1.5
++++ lang/python36/options.mk	25 Jun 2021 12:19:29 -0000
+@@ -12,6 +12,7 @@ PLIST_VARS+=		dtrace
+ .if !empty(PKG_OPTIONS:Mdtrace)
+ CONFIGURE_ARGS+=	--with-dtrace
+ PLIST.dtrace=		yes
++USE_TOOLS+= 		dtrace
+ .endif
+ 
+ .if !empty(PKG_OPTIONS:Mx11)
+Index: lang/python37/options.mk
+===================================================================
+RCS file: /cvsroot/pkgsrc/lang/python37/options.mk,v
+retrieving revision 1.5
+diff -u -p -r1.5 options.mk
+--- lang/python37/options.mk	21 Jan 2020 10:57:26 -0000	1.5
++++ lang/python37/options.mk	25 Jun 2021 12:19:29 -0000
+@@ -12,6 +12,7 @@ PLIST_VARS+=		dtrace
+ .if !empty(PKG_OPTIONS:Mdtrace)
+ CONFIGURE_ARGS+=	--with-dtrace
+ PLIST.dtrace=		yes
++USE_TOOLS+= 		dtrace
+ .endif
+ 
+ .if !empty(PKG_OPTIONS:Mx11)
+Index: lang/python38/options.mk
+===================================================================
+RCS file: /cvsroot/pkgsrc/lang/python38/options.mk,v
+retrieving revision 1.2
+diff -u -p -r1.2 options.mk
+--- lang/python38/options.mk	21 Jan 2020 10:57:26 -0000	1.2
++++ lang/python38/options.mk	25 Jun 2021 12:19:29 -0000
+@@ -12,6 +12,7 @@ PLIST_VARS+=		dtrace
+ .if !empty(PKG_OPTIONS:Mdtrace)
+ CONFIGURE_ARGS+=	--with-dtrace
+ PLIST.dtrace=		yes
++USE_TOOLS+= 		dtrace
+ .endif
+ 
+ .if !empty(PKG_OPTIONS:Mx11)
+Index: lang/python39/options.mk
+===================================================================
+RCS file: /cvsroot/pkgsrc/lang/python39/options.mk,v
+retrieving revision 1.1
+diff -u -p -r1.1 options.mk
+--- lang/python39/options.mk	10 Oct 2020 20:19:47 -0000	1.1
++++ lang/python39/options.mk	25 Jun 2021 12:19:29 -0000
+@@ -12,6 +12,7 @@ PLIST_VARS+=		dtrace
+ .if !empty(PKG_OPTIONS:Mdtrace)
+ CONFIGURE_ARGS+=	--with-dtrace
+ PLIST.dtrace=		yes
++USE_TOOLS+= 		dtrace
+ .endif
+ 
+ .if !empty(PKG_OPTIONS:Mx11)
